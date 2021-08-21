@@ -16,6 +16,8 @@ import transforms3d as tf3d
 import pybullet as pb
 import random
 from PIL import Image
+import pdb
+import imageio
 
 from generation.mujocoCabinetParts import build_cabinet, sample_cabinet
 from generation.mujocoDrawerParts import build_drawer, sample_drawers
@@ -30,12 +32,26 @@ pb_client = pb.connect(pb.GUI)
 pb.setGravity(0,0,-100)
 
 def white_bg(img):
+
+    # print('img', img)
+    img = np.array(img)
+    # print('img', img.shape)
+
+    img = img.reshape(108, 192, 4)
+    # imageio.imwrite('img.png', img)
+
+    # pdb.set_trace()
     mask = 1 - (img > 0)
     img_cp = copy.deepcopy(img)
     img_cp[mask.all(axis=2)] = [255,255,255, 0]
     return img_cp
 
 def buffer_to_real(z, zfar, znear):
+    z = np.array(z).reshape(108, 192)
+    # print('z', z)
+    # print('zfar', zfar)
+    # print('znear', znear)
+
     return 2*zfar*znear / (zfar + znear - (zfar - znear)*(2*z -1))
 
 def vertical_flip(img):

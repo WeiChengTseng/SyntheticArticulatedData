@@ -16,3 +16,4 @@ Setup:
 
 Example generation:
 ```python generate_data.py --n 10 --dir ./test --obj microwave --masked --debug --py-bullet```
+```python generate_data.py --n 10 --dir ./test --obj drawer --masked --debug --py-bullet```
