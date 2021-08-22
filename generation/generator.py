@@ -25,27 +25,29 @@ from generation.mujocoRefrigeratorParts import build_refrigerator, sample_refrig
 from generation.utils import *
 import generation.calibrations as calibrations
 
+
 def white_bg(img):
     mask = 1 - (img > 0)
     img_cp = copy.deepcopy(img)
-    img_cp[mask.all(axis=2)] = [255,255,255]
+    img_cp[mask.all(axis=2)] = [255, 255, 255]
     return img_cp
 
+
 def buffer_to_real(z, zfar, znear):
-    return 2*zfar*znear / (zfar + znear - (zfar - znear)*(2*z -1))
+    return 2 * zfar * znear / (zfar + znear - (zfar - znear) * (2 * z - 1))
+
 
 def vertical_flip(img):
     return np.flip(img, axis=0)
 
 
-
-def sp_noise(image,prob):
+def sp_noise(image, prob):
     '''
     Add salt and pepper noise to image
     prob: Probability of the noise
     '''
-    output = np.zeros(image.shape,np.uint8)
-    thres = 1 - prob 
+    output = np.zeros(image.shape, np.uint8)
+    thres = 1 - prob
     for i in range(image.shape[0]):
         for j in range(image.shape[1]):
             rdn = random.random()
@@ -59,7 +61,10 @@ def sp_noise(image,prob):
 
 
 class SceneGenerator():
-    def __init__(self, root_dir='bull/test_cabinets/solo', masked=False, debug_flag=False):
+    def __init__(self,
+                 root_dir='bull/test_cabinets/solo',
+                 masked=False,
+                 debug_flag=False):
         '''
         Class for generating simulated articulated object dataset.
         params:
@@ -68,12 +73,12 @@ class SceneGenerator():
             - depth_data: np array of depth images
             - masked: should the background of depth images be 0s or 1s?
         '''
-        self.scenes=[]
-        self.savedir=root_dir
+        self.scenes = []
+        self.savedir = root_dir
         self.masked = masked
         self.img_idx = 0
-        self.depth_data=[]
-        self.debugging=debug_flag
+        self.depth_data = []
+        self.debugging = debug_flag
         print(root_dir)
 
     def write_urdf(self, filename, xml):
@@ -84,45 +89,69 @@ class SceneGenerator():
         if obj_type == 'microwave':
             l, w, h, t, left, mass = sample_microwave(mean_flag)
             if mean_flag:
-                obj = build_microwave(l, w, h, t, left,
-                                      set_pose = [1.0, 0.0, -0.15],
-                                      set_rot = [0.0, 0.0, 0.0, 1.0] )
+                obj = build_microwave(l,
+                                      w,
+                                      h,
+                                      t,
+                                      left,
+                                      set_pose=[1.0, 0.0, -0.15],
+                                      set_rot=[0.0, 0.0, 0.0, 1.0])
             elif cute_flag:
                 base_xyz, base_angle = sample_pose()
                 base_quat = angle_to_quat(base_angle)
-                obj = build_microwave(l, w, h, t, left,
-                                      set_pose = [1.0, 0.0, -0.15],
-                                      set_rot = base_quat)
+                obj = build_microwave(l,
+                                      w,
+                                      h,
+                                      t,
+                                      left,
+                                      set_pose=[1.0, 0.0, -0.15],
+                                      set_rot=base_quat)
             else:
                 obj = build_microwave(l, w, h, t, left)
 
         elif obj_type == 'drawer':
             l, w, h, t, left, mass = sample_drawers(mean_flag)
             if mean_flag:
-                obj = build_drawer(l, w, h, t, left,
-                                   set_pose = [1.5, 0.0, -0.4],
-                                   set_rot = [0.0, 0.0, 0.0, 1.0] )
+                obj = build_drawer(l,
+                                   w,
+                                   h,
+                                   t,
+                                   left,
+                                   set_pose=[1.5, 0.0, -0.4],
+                                   set_rot=[0.0, 0.0, 0.0, 1.0])
             elif cute_flag:
-               base_xyz, base_angle = sample_pose()
-               base_quat = angle_to_quat(base_angle)
-               obj = build_drawer(l, w, h, t, left,
-                                     set_pose = [1.2, 0.0, -0.15],
-                                     set_rot = base_quat)
+                base_xyz, base_angle = sample_pose()
+                base_quat = angle_to_quat(base_angle)
+                obj = build_drawer(l,
+                                   w,
+                                   h,
+                                   t,
+                                   left,
+                                   set_pose=[1.2, 0.0, -0.15],
+                                   set_rot=base_quat)
             else:
                 obj = build_drawer(l, w, h, t, left)
 
         elif obj_type == 'toaster':
             l, w, h, t, left, mass = sample_toaster(mean_flag)
             if mean_flag:
-                obj = build_toaster(l, w, h, t, left,
-                                    set_pose = [1.5, 0.0, -0.3],
-                                    set_rot = [0.0, 0.0, 0.0, 1.0] )
+                obj = build_toaster(l,
+                                    w,
+                                    h,
+                                    t,
+                                    left,
+                                    set_pose=[1.5, 0.0, -0.3],
+                                    set_rot=[0.0, 0.0, 0.0, 1.0])
             elif cute_flag:
                 base_xyz, base_angle = sample_pose()
                 base_quat = angle_to_quat(base_angle)
-                obj = build_toaster(l, w, h, t, left,
-                                      set_pose = [1.0, 0.0, -0.15],
-                                      set_rot = base_quat)
+                obj = build_toaster(l,
+                                    w,
+                                    h,
+                                    t,
+                                    left,
+                                    set_pose=[1.0, 0.0, -0.15],
+                                    set_rot=base_quat)
             else:
                 obj = build_toaster(l, w, h, t, left)
 
@@ -130,34 +159,50 @@ class SceneGenerator():
             l, w, h, t, left, mass = sample_cabinet(mean_flag)
             if mean_flag:
                 if left_only:
-                    left=True
+                    left = True
                 else:
-                    left=False
-                obj = build_cabinet(l, w, h, t, left,
-                                    set_pose = [1.5, 0.0, -0.3],
-                                    set_rot = [0.0, 0.0, 0.0, 1.0] )
+                    left = False
+                obj = build_cabinet(l,
+                                    w,
+                                    h,
+                                    t,
+                                    left,
+                                    set_pose=[1.5, 0.0, -0.3],
+                                    set_rot=[0.0, 0.0, 0.0, 1.0])
             elif cute_flag:
                 base_xyz, base_angle = sample_pose()
                 base_quat = angle_to_quat(base_angle)
-                obj = build_cabinet(l, w, h, t, left,
-                                      set_pose = [1.5, 0.0, -0.15],
-                                      set_rot = base_quat)
+                obj = build_cabinet(l,
+                                    w,
+                                    h,
+                                    t,
+                                    left,
+                                    set_pose=[1.5, 0.0, -0.15],
+                                    set_rot=base_quat)
             else:
-                left = np.random.choice([True,False])
+                left = np.random.choice([True, False])
                 obj = build_cabinet(l, w, h, t, left)
 
         elif obj_type == 'cabinet2':
             l, w, h, t, left, mass = sample_cabinet2(mean_flag)
             if mean_flag:
-                obj = build_cabinet2(l, w, h, t, left,
-                                     set_pose = [1.5, 0.0, -0.3],
-                                     set_rot = [0.0, 0.0, 0.0, 1.0] )
+                obj = build_cabinet2(l,
+                                     w,
+                                     h,
+                                     t,
+                                     left,
+                                     set_pose=[1.5, 0.0, -0.3],
+                                     set_rot=[0.0, 0.0, 0.0, 1.0])
             elif cute_flag:
                 base_xyz, base_angle = sample_pose()
                 base_quat = angle_to_quat(base_angle)
-                obj = build_cabinet2(l, w, h, t, left,
-                                      set_pose = [1.5, 0.0, -0.15],
-                                      set_rot = base_quat)
+                obj = build_cabinet2(l,
+                                     w,
+                                     h,
+                                     t,
+                                     left,
+                                     set_pose=[1.5, 0.0, -0.15],
+                                     set_rot=base_quat)
             else:
                 obj = build_cabinet2(l, w, h, t, left)
 
@@ -165,15 +210,23 @@ class SceneGenerator():
             l, w, h, t, left, mass = sample_refrigerator(mean_flag)
             if mean_flag:
 
-                obj = build_refrigerator(l, w, h, t, left,
-                                         set_pose = [1.5, 0.0, -0.3],
-                                         set_rot = [0.0, 0.0, 0.0, 1.0])
+                obj = build_refrigerator(l,
+                                         w,
+                                         h,
+                                         t,
+                                         left,
+                                         set_pose=[1.5, 0.0, -0.3],
+                                         set_rot=[0.0, 0.0, 0.0, 1.0])
             elif cute_flag:
                 base_xyz, base_angle = sample_pose()
                 base_quat = angle_to_quat(base_angle)
-                obj = build_refrigerator(l, w, h, t, left,
-                                      set_pose = [2.5, 0.0, -0.75],
-                                      set_rot = base_quat)
+                obj = build_refrigerator(l,
+                                         w,
+                                         h,
+                                         t,
+                                         left,
+                                         set_pose=[2.5, 0.0, -0.75],
+                                         set_rot=base_quat)
 
             else:
                 obj = build_refrigerator(l, w, h, t, left)
@@ -182,15 +235,28 @@ class SceneGenerator():
             raise 'uh oh, object not implemented!'
         return obj
 
-    def generate_scenes(self, N, objtype, write_csv=True, save_imgs=True, mean_flag=False, left_only=False, cute_flag=False, test=False, video=False):
-        fname=os.path.join(self.savedir, 'params.csv')
+    def generate_scenes(self,
+                        N,
+                        objtype,
+                        write_csv=True,
+                        save_imgs=True,
+                        mean_flag=False,
+                        left_only=False,
+                        cute_flag=False,
+                        test=False,
+                        video=False):
+        fname = os.path.join(self.savedir, 'params.csv')
         self.img_idx = 0
         with open(fname, 'a') as csvfile:
             writ = csv.writer(csvfile, delimiter=',')
             for i in tqdm(range(N)):
-                obj = self.sample_obj(objtype, mean_flag, left_only, cute_flag=cute_flag)
-                xml=obj.xml
-                fname=os.path.join(self.savedir, 'scene'+str(i).zfill(6)+'.xml')
+                obj = self.sample_obj(objtype,
+                                      mean_flag,
+                                      left_only,
+                                      cute_flag=cute_flag)
+                xml = obj.xml
+                fname = os.path.join(self.savedir,
+                                     'scene' + str(i).zfill(6) + '.xml')
                 self.write_urdf(fname, xml)
                 self.scenes.append(fname)
                 self.take_images(fname, obj, writ)
@@ -199,18 +265,21 @@ class SceneGenerator():
     def take_images(self, filename, obj, writer, img_idx=0, debug=False):
         model = load_model_from_path(filename)
         sim = MjSim(model)
-        modder= TextureModder(sim)
+        modder = TextureModder(sim)
         # viewer=MjViewer(sim) # this fucking line has caused me so much pain.
 
         embedding = np.append(obj.type, obj.geom.reshape(-1))
         if obj.type == 4 or obj.type == 5:
             # MULTI CABINET: get double the params.
-            axis1, door1 = transform_param(obj.params[0][0],obj.params[0][1], obj)
-            axis2, door2 = transform_param(obj.params[1][0],obj.params[1][1], obj)
-            axes = np.append(axis1,axis2)
-            doors = np.append(door1,door2)
-            params = np.append(axes,doors)
-            set_two_door_control(sim, 'cabinet2' if obj.type == 4 else 'refrigerator')
+            axis1, door1 = transform_param(obj.params[0][0], obj.params[0][1],
+                                           obj)
+            axis2, door2 = transform_param(obj.params[1][0], obj.params[1][1],
+                                           obj)
+            axes = np.append(axis1, axis2)
+            doors = np.append(door1, door2)
+            params = np.append(axes, doors)
+            set_two_door_control(
+                sim, 'cabinet2' if obj.type == 4 else 'refrigerator')
             n_qpos_variables = 2
 
         else:
@@ -224,25 +293,31 @@ class SceneGenerator():
             else:
                 sim.data.ctrl[0] = 0.2
 
-            params = get_cam_relative_params2(obj) # if 1DoF, params is length 10. If 2DoF, params is length 20.
+            params = get_cam_relative_params2(
+                obj
+            )  # if 1DoF, params is length 10. If 2DoF, params is length 20.
 
-        embedding_and_params = np.concatenate((embedding, params, obj.pose, obj.rotation))
+        embedding_and_params = np.concatenate(
+            (embedding, params, obj.pose, obj.rotation))
         # print('nqpos', n_qpos_variables)
         # print(self.img_idx, obj.pose)
         # print(embedding_and_params.shape)
         t = 0
-        while t<4000:
+        while t < 4000:
             sim.forward()
             sim.step()
 
-            if t%250==0:
+            if t % 250 == 0:
 
                 #########################
                 IMG_WIDTH = calibrations.sim_width
                 IMG_HEIGHT = calibrations.sim_height
                 #########################
 
-                img, depth = sim.render(IMG_WIDTH, IMG_HEIGHT, camera_name='external_camera_0', depth=True)
+                img, depth = sim.render(IMG_WIDTH,
+                                        IMG_HEIGHT,
+                                        camera_name='external_camera_0',
+                                        depth=True)
                 depth = vertical_flip(depth)
                 real_depth = buffer_to_real(depth, 12.0, 0.1)
                 norm_depth = real_depth / 12.0
@@ -250,7 +325,7 @@ class SceneGenerator():
                 if self.masked:
                     # remove background
                     mask = norm_depth > 0.99
-                    norm_depth = (1-mask)*norm_depth
+                    norm_depth = (1 - mask) * norm_depth
 
                 if self.debugging:
                     # save image to disk for visualization
@@ -258,8 +333,12 @@ class SceneGenerator():
 
                     img = vertical_flip(img)
                     img = white_bg(img)
-                    imgfname = os.path.join(self.savedir, 'img'+str(self.img_idx).zfill(6)+'.png')
-                    depth_imgfname = os.path.join(self.savedir, 'depth_img'+str(self.img_idx).zfill(6)+'.png')
+                    imgfname = os.path.join(
+                        self.savedir,
+                        'img' + str(self.img_idx).zfill(6) + '.png')
+                    depth_imgfname = os.path.join(
+                        self.savedir,
+                        'depth_img' + str(self.img_idx).zfill(6) + '.png')
                     integer_depth = norm_depth * 255
 
                     cv2.imwrite(imgfname, img)
@@ -270,19 +349,21 @@ class SceneGenerator():
 
                     # noise_integer_depth = sp_noise(integer_depth,0.1)
                     # cv2.imwrite(depth_imgfname, noise_integer_depth)
-                 
 
                 # if IMG_WIDTH != 192 or IMG_HEIGHT != 108:
                 #     depth = cv2.resize(norm_depth, (192,108))
 
-                depthfname = os.path.join(self.savedir,'depth'+str(self.img_idx).zfill(6) + '.pt')
+                depthfname = os.path.join(
+                    self.savedir, 'depth' + str(self.img_idx).zfill(6) + '.pt')
                 torch.save(torch.tensor(norm_depth.copy()), depthfname)
-                row = np.append(embedding_and_params, sim.data.qpos[:n_qpos_variables])
+                row = np.append(embedding_and_params,
+                                sim.data.qpos[:n_qpos_variables])
                 # print(row.shape)
                 writer.writerow(row)
                 self.img_idx += 1
 
             t += 1
+
 
 # shapes and stuff
 # if 1DoF, params is length 10. If 2DoF, params is length 20.
